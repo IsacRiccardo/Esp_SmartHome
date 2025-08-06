@@ -13,24 +13,10 @@
 // Custom includes
 #include "WiFi.h"
 #include "Http.h"
+#include "ApplicationTask_Core0.h"
+#include "ApplicationTask_Core1.h"
 
 static const char *TAG = "MainApp";
-
-// ==== HTTP POST Task ====
-static void http_post_task(void *pvParameters)
-{
-    while (1)
-    {
-        // Prepare data to send
-        const char *post_data = "[{\"sensor\": \"ESP32\", \"value\": \"50\", \"type\": \"numeric\"}]";
-
-        // Send data via HTTP POST
-        Http_JsonSendData(post_data);
-
-        vTaskDelay(5000 / portTICK_PERIOD_MS); // Delay for 5 seconds before sending the next request
-
-    }
-}
 
 // ==== Shutdown Hook ====
 void shutdown_hook(void)
@@ -41,9 +27,7 @@ void shutdown_hook(void)
     Http_ClientCleanup();
 }
 
-
-// ==== Main Application ====
-void app_main(void)
+void app_init(void)
 {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -52,7 +36,7 @@ void app_main(void)
         ESP_ERROR_CHECK(nvs_flash_init());
     }
 
-    // Initialize Event Manager
+    // Initialize Wi-Fi
     WiFi_Init();
 
     // Wait for Wi-Fi to connect
@@ -64,5 +48,24 @@ void app_main(void)
     // Initialize HTTP client
     Http_Init();
 
-    xTaskCreate(&http_post_task, "http_post_task", 8192, NULL, 5, NULL);
+    // Initialize the application tasks
+    ApplicationTask_Core0_Init();
+    ApplicationTask_Core1_Init();
+}
+
+void app_start(void)
+{
+    // Start the application tasks
+    ApplicationTask_Core0_Start();
+    ApplicationTask_Core1_Start();
+}
+
+// ==== Main Application ====
+void app_main(void)
+{
+    // Initialize the application and used modules
+    app_init();
+
+    // Start the application tasks
+    app_start();
 }
