@@ -13,6 +13,7 @@
 // Custom includes
 #include "WiFi.h"
 #include "Http.h"
+#include "Port.h"
 #include "ApplicationTask_Core0.h"
 #include "ApplicationTask_Core1.h"
 
@@ -36,6 +37,8 @@ void app_init(void)
         ESP_ERROR_CHECK(nvs_flash_init());
     }
 
+    Port_Init();
+
     // Initialize Wi-Fi
     WiFi_Init();
 
@@ -49,15 +52,15 @@ void app_init(void)
     Http_Init();
 
     // Initialize the application tasks
-    ApplicationTask_Core0_Init();
-    ApplicationTask_Core1_Init();
+    (void)ApplicationTask_Core0_Init();
+    (void)ApplicationTask_Core1_Init();
 }
 
 void app_start(void)
 {
     // Start the application tasks
-    ApplicationTask_Core0_Start();
-    ApplicationTask_Core1_Start();
+    (void)ApplicationTask_Core0_Start();
+    (void)ApplicationTask_Core1_Start();
 }
 
 // ==== Main Application ====
